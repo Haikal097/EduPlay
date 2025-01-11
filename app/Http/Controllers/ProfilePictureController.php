@@ -44,18 +44,18 @@ class ProfilePictureController extends Controller
 
     public function getProfilePicture()
     {
-        // Get the currently logged-in user
         $user = Auth::user();
         if ($user) {
             // Retrieve the profile image path from the database
             $profileImagePath = $user->profile_image;
-
+    
             // Pass the profile image path to the view
-            return view('userprofile.index', compact('profileImagePath'));
+            return view('userprofile.index', compact('profileImagePath', 'user')); // Pass the entire $user model
         }
-
+    
         return redirect()->route('login')->with('error', 'User not authenticated');
     }
+    
 
     public function updateProfile(Request $request)
     {
@@ -79,4 +79,27 @@ class ProfilePictureController extends Controller
         // Redirect back with a success message
         return redirect()->back()->with('success', 'Profile updated successfully.');
     }
+    public function showProfile($id)
+    {
+        $profileUser = User::findOrFail($id); // Fetch the user by ID
+        $favouriteNotes = $profileUser->favouriteNotes; // Retrieve their favourite notes (if any)
+    
+        return view('userprofile.index', [
+            'profileUser' => $profileUser,
+            'favouriteNotes' => $favouriteNotes
+        ]);
+    }
+    
+    public function showMyProfile()
+    {
+        $user = Auth::user();
+        $favouriteNotes = $user->favouriteNotes; // Assuming the relationship is set up in the User model
+    
+        return view('userprofile.index', [
+            'profileUser' => $user,
+            'favouriteNotes' => $favouriteNotes
+        ]);
+    }
+    
+    
 }

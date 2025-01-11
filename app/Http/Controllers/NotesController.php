@@ -42,4 +42,9 @@ class NotesController extends Controller
 
         return redirect()->route('notes.index')->with('success', 'Note uploaded successfully.');
     }
+    public function show($id)
+{
+    $note = Note::with('user')->findOrFail($id); // Fetch note with the user relationship
+    return view('notes.note', compact('note'));
+}
 }

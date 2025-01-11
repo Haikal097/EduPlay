@@ -143,9 +143,24 @@
         transition: background-color 0.3s ease;
       }
 
+      .card.fixed-width-card.fixed-height-card:hover .bold-link {
+  color: white !important;
+}
+
+
       .card.fixed-width-card.fixed-height-card:hover .card-body {
         color: white;
       }
+
+      .bold-link {
+  font-weight: bold;
+  text-decoration: none; /* No underline by default */
+  transition: text-decoration 0.3s ease; /* Smooth transition */
+}
+
+.bold-link:hover {
+  text-decoration: underline; /* Underline when hovered */
+}
     </style>
   </head>
   <body>
@@ -228,29 +243,44 @@
       <div class="rectangle-box d-flex align-items-center">
         <div class="row justify-content-center">
           @foreach ($notes as $note)
-            <div class="col-md-6 mb-4 d-flex justify-content-center">
-              <div class="card fixed-width-card fixed-height-card d-flex flex-row position-relative hover-container" onclick="window.location.href='#'" style="cursor: pointer;">
-                <div class="thumbnail-container">
-                  @if ($note->thumbnail_path)
-                    <img src="{{ Storage::url($note->thumbnail_path) }}" class="img-fluid" alt="Thumbnail">
-                  @else
-                    <img src="{{ asset('images/default-thumbnail.jpg') }}" class="img-fluid" alt="Default Thumbnail">
-                  @endif
-                </div>
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">{{ $note->title }}</h5>
-                  <p class="card-text truncate-text">uploaded by: {{ $note->user->name }}</p>
-                  <div class="mt-auto">
-                    <a href="{{ Storage::url($note->file_path) }}" class="btn btn-success download-btn position-absolute bottom-0 end-0 mb-2 me-2" target="_blank">
-                      <i class="fas fa-download"></i>
-                    </a>
-                    <button class="btn btn-warning favorite-btn position-absolute top-0 end-0 mt-2 me-2" data-note-id="{{ $note->id }}">
-                      <i class="fas fa-star"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
+          <div 
+    class="col-md-6 mb-4 d-flex justify-content-center">
+    <div 
+        class="card fixed-width-card fixed-height-card d-flex flex-row position-relative hover-container" 
+        data-href="{{ route('notes.show', $note->id) }}" 
+        style="cursor: pointer;" 
+        onclick="window.location.href=this.getAttribute('data-href');">
+        <div class="thumbnail-container">
+            @if ($note->thumbnail_path)
+                <img src="{{ Storage::url($note->thumbnail_path) }}" class="img-fluid" alt="Thumbnail">
+            @else
+                <img src="{{ asset('images/default-thumbnail.jpg') }}" class="img-fluid" alt="Default Thumbnail">
+            @endif
+        </div>
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ $note->title }}</h5>
+            <p class="card-text truncate-text">
+                uploaded by: <a href="{{ route('profile.show', $note->user->id) }}" class="bold-link">{{ $note->user->name }}</a>
+            </p>
+            <div class="mt-auto">
+                <a href="{{ Storage::url($note->file_path) }}" 
+                   class="btn btn-success download-btn position-absolute bottom-0 end-0 mb-2 me-2" 
+                   target="_blank" 
+                   onclick="event.stopPropagation();">
+                    <i class="fas fa-download"></i>
+                </a>
+                <button 
+                    class="btn btn-warning favorite-btn position-absolute top-0 end-0 mt-2 me-2" 
+                    data-note-id="{{ $note->id }}" 
+                    onclick="event.stopPropagation();">
+                    <i class="fas fa-star"></i>
+                </button>
             </div>
+        </div>
+    </div>
+</div>
+
+
           @endforeach
         </div>
       </div>

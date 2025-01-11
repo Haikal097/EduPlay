@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Font Awesome CDN -->
+
     <style>
       .navbar-custom {
         height: 90px; /* Adjust the height as needed */
@@ -51,26 +53,26 @@
         display: inline-block;
         text-decoration: none;
       }
-  .hover-highlight::after {
-    content: '';
-    position: absolute;
-    width: 70%;
-    transform: scaleX(0);
-    height: 3px;
-    bottom: -3px;
-    left: 50%;
-    margin-left: -35%;
-    bottom: -15px;
-    background-color:rgb(255, 255, 255); /* Highlight color */
-    transform-origin: bottom right;
-    transition: transform 0.25s ease-out;
-    text-decoration: none;
-  }
-  .hover-highlight:hover::after {
-    transform: scaleX(1);
-    transform-origin: bottom left;
-    text-decoration: none;
-  }
+      .hover-highlight::after {
+        content: '';
+        position: absolute;
+        width: 70%;
+        transform: scaleX(0);
+        height: 3px;
+        bottom: -3px;
+        left: 50%;
+        margin-left: -35%;
+        bottom: -15px;
+        background-color: rgb(255, 255, 255); /* Highlight color */
+        transform-origin: bottom right;
+        transition: transform 0.25s ease-out;
+        text-decoration: none;
+      }
+      .hover-highlight:hover::after {
+        transform: scaleX(1);
+        transform-origin: bottom left;
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
@@ -89,34 +91,33 @@
         </div>
 
         <div class="ml-auto">
-            @if (Route::has('login'))
-                @auth
-                  <a href="{{ url('/userprofile') }}">
-                  @if (Auth::user()->profile_image)
-                    <img src="{{ 'storage/' . Auth::user()->profile_image  }}" alt="Profile" class="rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;">
-                  @else
-                    <img src="images/placeholder_pfp.svg" alt="Default Profile Image" class="profile-image rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;"  >
-                  @endif
-                  </a>
-                    @else
-                      <a
-                        href="{{ route('login') }}"
-                        class="button_login text-decoration-none"
-                        >
-                        Log in
-                      </a>
+        @if (Route::has('login'))
+    @auth
+        <div class="d-flex align-items-center">
+            <a href="{{ url('/userprofile/' . auth()->user()->id) }}">
+                @if(auth()->user()->profile_image)
+                    <img src="{{ asset('storage/' . auth()->user()->profile_image) }}" alt="Profile Image" class="profile-image rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;">
+                @else
+                    <img src="{{ asset('images/placeholder_pfp.svg') }}" alt="Default Profile Image" class="profile-image rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;">
+                @endif
+            </a>
 
-                      @if (Route::has('register'))
-                        <a
-                          href="{{ route('register') }}"
-                          class="button_register text-decoration-none"
-                        >
-                          Register
-                        </a>
-                      @endif
-                @endauth
-            @endif
-        </div>    
+            <!-- Log Out Button with Icon -->
+            <form action="{{ route('logout') }}" method="POST" class="ms-3">
+                @csrf
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> <!-- Font Awesome Logout Icon -->
+                </button>
+            </form>
+        </div>
+    @else
+        <a href="{{ route('login') }}" class="button_login text-decoration-none">Log in</a>
+        @if (Route::has('register'))
+            <a href="{{ route('register') }}" class="button_register text-decoration-none">Register</a>
+        @endif
+    @endauth
+@endif
+        </div>
     </nav>
   </body>
 </html>

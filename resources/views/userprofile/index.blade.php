@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
       body {
         background-color: rgb(233, 233, 233) !important; /* Change this to your desired background color */
@@ -223,115 +225,164 @@
     @endif
 
     <div class="container mt-5">
-        <div class="rectangle-box d-flex align-items-center">
-            @if(auth()->user()->profile_image)
-                <div class="profile-image-container">
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#editpfpModal">
-                      <img src="{{ asset('storage/' . auth()->user()->profile_image) }}" alt="Profile Image" class="profile-image">
-                      <span class="edit-icon">&#9998;</span>
-                    </a>
-                </div>
+    <div class="rectangle-box d-flex align-items-center position-relative">
+    <!-- Info Icon -->
+    <a href="#" class="info-icon position-absolute" style="top: -2px; right: 4px;" data-bs-toggle="modal" data-bs-target="#infoModal">
+        <i class="bi bi-info-circle-fill" style="font-size: 1.5rem; color: #007bff;"></i>
+    </a>
+
+    <!-- Profile image and edit option -->
+    @if($profileUser->profile_image)
+        <div class="profile-image-container">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#editpfpModal">
+              <img src="{{ asset('storage/' . $profileUser->profile_image) }}" alt="Profile Image" class="profile-image">
+              <span class="edit-icon">&#9998;</span>
+            </a>
+        </div>
+    @else
+        <div class="profile-image-container">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#editpfpModal">
+              <img src="{{ asset('images/placeholder_pfp.svg') }}" alt="Default Profile Image" class="profile-image">
+              <span class="edit-icon">&#9998;</span>
+            </a>
+        </div>
+    @endif
+
+    <div class="user-details flex-grow-2">
+        <h1 class="extra-bold-text">{{ $profileUser->name }}</h1>
+        <p>{{ $profileUser->email }}</p>
+
+        @if(Auth::id() === $profileUser->id)
+            <!-- Only show the edit button if viewing own profile -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editinfoModal">Edit Profile</button>
+        @endif
+    </div>
+
+    <div class="vertical-divider"></div> <!-- Vertical divider -->
+    <div class="d-flex flex-column align-items-start ml-3">
+        <p class="bio-text">
+            {{ $profileUser->bio ? $profileUser->bio : 'This user hasn\'t set a bio yet.' }}
+        </p>
+    </div>
+</div>
+        
+        <!-- Favorite games list -->
+        <div class="rectangle-box d-flex align-items-center flex-column">
+            <h2 class="title-overlap text-outline"><strong>&#9733; Favourite Games </strong></h2>
+            @if($favouriteNotes->isEmpty())
+                <p>{{ $profileUser->name }} has no favorite games yet.</p>
             @else
-                <div class="profile-image-container">
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#editpfpModal">
-                      <img src="{{ asset('images/placeholder_pfp.svg') }}" alt="Default Profile Image" class="profile-image">
-                      <span class="edit-icon">&#9998;</span>
-                    </a>
+                <div class="horizontal-list-wrapper">
+                    <div class="horizontal-list-container">
+                        <div class="horizontal-list d-flex align-items-center">
+                          
+                        </div>
+                    </div>
                 </div>
             @endif
-            <div class="user-details flex-grow-2">
-                <h1 class="extra-bold-text">{{ Auth::user()->name }}</h1>
-                <p>{{ Auth::user()->email }}</p>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editinfoModal">Edit Profile</button>
-            </div>
-            <div class="vertical-divider"></div> <!-- Vertical divider -->
-            <div class="d-flex flex-column align-items-start ml-3">
-                <p class="bio-text">{{ Auth::user()->bio }}</p>
-            </div>
         </div>
-
-        <!-- fav list -->
+        <!-- Favorite notes list -->
         <div class="rectangle-box d-flex align-items-center flex-column">
             <h2 class="title-overlap text-outline"><strong>&#9733; Favourite Notes </strong></h2>
             @if($favouriteNotes->isEmpty())
-    <p>No favorite notes yet.</p>
-@else
-    <div class="horizontal-list-wrapper">
-        <div class="horizontal-list-container">
-            <div class="horizontal-list d-flex align-items-center">
-                @foreach($favouriteNotes as $favorite)
-                    <div class="note-card">
-                        <img src="{{ Storage::url($favorite->note->thumbnail_path) }}" class="thumbnail-image" alt="Thumbnail">
-                        <div class="note-info">
-                            <strong>{{ $favorite->note->title }}</strong>
-                            <p>{{ $favorite->note->user->name }}</p> <!-- assuming note has a user -->
+                <p>{{ $profileUser->name }} has no favorite notes yet.</p>
+            @else
+                <div class="horizontal-list-wrapper">
+                    <div class="horizontal-list-container">
+                        <div class="horizontal-list d-flex align-items-center">
+                            @foreach($favouriteNotes as $favorite)
+                                <div class="note-card">
+                                    <img src="{{ Storage::url($favorite->note->thumbnail_path) }}" class="thumbnail-image" alt="Thumbnail">
+                                    <div class="note-info">
+                                        <strong>{{ $favorite->note->title }}</strong>
+                                        <p>{{ $favorite->note->user->name }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endif
         </div>
-    </div>
-@endif
-        </div>
+        
     </div>
 
-    <!-- Modal for Editing Profile Picture -->
-    <div class="modal fade" id="editpfpModal" tabindex="-1" aria-labelledby="editpfpModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editpfpModalLabel">Edit Profile Picture</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form action="{{ route('image.upload') }}" method="post" enctype="multipart/form-data">
-            @csrf
-            <div class="modal-body">
-              <div class="mb-3">
-                <label for="profile_image" class="form-label">Max File: 2 MB</label>
-                <input type="file" class="form-control" id="profile_image" name="img">
-              </div>
+    @if(Auth::id() === $profileUser->id)
+        <!-- Modal for Editing Profile Picture -->
+        <div class="modal fade" id="editpfpModal" tabindex="-1" aria-labelledby="editpfpModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editpfpModalLabel">Edit Profile Picture</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('image.upload') }}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="profile_image" class="form-label">Max File: 2 MB</label>
+                                <input type="file" class="form-control" id="profile_image" name="img">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-          </form>
         </div>
-      </div>
-    </div>
 
-    <!-- Modal for Editing Profile Info -->
-    <div class="modal fade" id="editinfoModal" tabindex="-1" aria-labelledby="editinfoModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editinfoModalLabel">Edit Profile Information</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form id="editForm" action="{{ route('userprofile.update') }}" method="post">
-            @csrf
-            <div class="modal-body">
-              <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ Auth::user()->name }}">
-              </div>
-              <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" value="{{ Auth::user()->email }}">
-              </div>
-              <div class="mb-3">
-                <label for="bio" class="form-label">Bio</label>
-                <textarea class="form-control no-resize" id="bio" name="bio" rows="3">{{ Auth::user()->bio }}</textarea>
-              </div>
+        <!-- Modal for Editing Profile Info -->
+        <div class="modal fade" id="editinfoModal" tabindex="-1" aria-labelledby="editinfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editinfoModalLabel">Edit Profile Information</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="editForm" action="{{ route('userprofile.update') }}" method="post">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ $profileUser->name }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ $profileUser->email }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="bio" class="form-label">Bio</label>
+                                <textarea class="form-control no-resize" id="bio" name="bio" rows="3">{{ $profileUser->bio }}</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-          </form>
         </div>
+        <!-- Info Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="infoModalLabel">Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Here you can display additional information about the user, profile, or any relevant details.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
+  </div>
+</div>
+    @endif
 
     <script>
         // Hide the alert after 3 seconds
@@ -346,5 +397,5 @@
             }
         }, 3000); // 3 seconds
     </script>
-  </body>
+</body>
 </html>
