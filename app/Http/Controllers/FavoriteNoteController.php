@@ -60,5 +60,35 @@ public function index()
         // Pass the variable to the view
         return view('userprofile.index', compact('favouriteNotes'));
     }
+    // Store or remove favorite
+    public function toggleFavorite(Request $request, $noteId)
+    {
+        $user = Auth::user(); // Get the authenticated user
     
+        // Ensure the note exists
+        $note = Note::find($noteId);
+        if (!$note) {
+            return response()->json(['error' => 'Note not found'], 404);
+        }
+    
+        // Check if the note is already favorited
+        $existingFavorite = FavouriteNote::where('user_id', $user->id)
+                                         ->where('note_id', $noteId)
+                                         ->first();
+    
+        if ($existingFavorite) {
+            // If it's already favorited, remove it
+            $existingFavorite->delete();
+            return response()->json(['message' => 'Note removed from favorites']);
+        } else {
+            // If it's not favorited, add it
+            FavouriteNote::create([
+                'user_id' => $user->id,
+                'note_id' => $noteId,
+            ]);
+            return response()->json(['message' => 'Note added to favorites']);
+        }
+    }
+
+
 }

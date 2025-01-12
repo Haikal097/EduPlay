@@ -365,7 +365,8 @@
                 </div>
             </div>
         </div>
-        <!-- Info Modal -->
+    @endif
+    <!-- Info Modal -->
 <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -382,7 +383,6 @@
     </div>
   </div>
 </div>
-    @endif
 
     <script>
         // Hide the alert after 3 seconds

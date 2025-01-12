@@ -36,5 +36,15 @@ class Note extends Model
         return $this->belongsToMany(User::class, 'favourite_notes', 'note_id', 'user_id')->withTimestamps();
     }
     
+    public function feedback()
+{
+    return $this->hasMany(FeedbackNote::class);
+}
+// In Note model
+public function getAverageRatingAttribute()
+{
+    return $this->feedback()->avg('rating') ?? 0;
+}
+
 
 }

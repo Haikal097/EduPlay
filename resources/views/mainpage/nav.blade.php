@@ -79,7 +79,7 @@
     <nav class="navbar navbar-light bg navbar-custom">
         <div class="ml-3">
             <a class="navbar-brand" href="{{ url('/') }}">
-                <img src="{{ asset('images/eduplay_logo.svg') }}" class="d-inline-block align-top" alt="Logo">
+                <img src="{{ asset('images/eduplay_logowhite.svg') }}" class="d-inline-block align-top" alt="Logo">
                 <strong class="ms-2 text-white">EduPlay</strong>
             </a>
         </div>

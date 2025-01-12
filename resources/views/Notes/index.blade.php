@@ -65,7 +65,6 @@
         height: 150px;
         overflow: hidden;
         position: relative;
-        border: 1px solid #ccc;
         border-radius: 5px;
         display: flex;
         justify-content: center;

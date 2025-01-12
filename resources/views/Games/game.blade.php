@@ -226,7 +226,7 @@
     <!-- Rating with label -->
     <div class="d-flex justify-content-between align-items-center">
         <p class="mb-0">Share your feedback!</p>
-        <div data-coreui-toggle="rating" data-coreui-value="3"></div>
+        <div data-coreui-precision="0.25" data-coreui-toggle="rating" data-coreui-value="0"></div>
     </div>
 
     <!-- Textarea below the rating -->
