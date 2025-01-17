@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Game;
+use App\Models\FavouriteGame;
 use ZipArchive;
 
 
@@ -69,15 +70,57 @@ class GameController extends Controller
         
         // Increment the view count
         $game->increment('views');
+        
+        // Fetch the feedback for the specific game
+        $feedback = $game->feedback;
+    
+        // Calculate the average rating (use 0 if no feedback exists)
+        $averageRating = $feedback->avg('rating') ?? 0;
+    
+        // Count the number of feedback entries for this game
+        $feedbackCount = $feedback->count();
+    
+        // Get the count of users who favorited this note
+        $favoriteCount = FavouriteGame::where('game_id', $id)->count();
 
-        // Return the games.game view and pass the game data to it
-        return view('games.game', compact('game'));
+        // Check if the authenticated user has favorited this game
+        $isFavorited = Auth::check() && Auth::user()->favouriteGames->contains($id);
+    
+        // Return the games.game view and pass all data to it
+        return view('games.game', compact('game', 'averageRating', 'feedbackCount', 'isFavorited', 'favoriteCount'));
     }
+    
     
     public function showGames()
 {
     $games = Game::all();  // Assuming you have a Game model for the database table
     return view('games.index', compact('games'));
+}
+
+public function showlistGames($id)
+{
+    // Fetch games for the current user based on user_id
+    $games = Game::where('user_id', $id) // Filter games based on the user ID
+        ->withCount('feedback')  // Count feedbacks
+        ->with(['feedback' => function ($query) {
+            $query->selectRaw('game_id, AVG(rating) as avg_rating')
+                  ->groupBy('game_id');
+        }])
+        ->get();
+
+    // Loop through each game to add the average rating for each
+    foreach ($games as $game) {
+        $game->avg_rating = $game->feedback->isEmpty() ? 0 : $game->feedback->first()->avg_rating;
+    }
+    // Return the view with the games data, including average ratings
+    return view('userprofile.gamelist', compact('games','id'));
+}
+public function destroy($id)
+{
+    $games = Game::findOrFail($id);
+    $games->delete();
+
+    return redirect()->back()->with('success', 'Game deleted successfully.');
 }
 
 }

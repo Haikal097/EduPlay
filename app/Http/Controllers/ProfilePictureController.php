@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Note;
+use App\Models\Game;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +15,7 @@ class ProfilePictureController extends Controller
     public function storeUpload(Request $request){
         
         $request->validate([
-            'img' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'img' => 'required|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
 
@@ -81,14 +83,30 @@ class ProfilePictureController extends Controller
     }
     public function showProfile($id)
     {
-        $profileUser = User::findOrFail($id); // Fetch the user by ID
-        $favouriteNotes = $profileUser->favouriteNotes; // Retrieve their favourite notes (if any)
+        // Fetch the user by ID
+        $profileUser = User::findOrFail($id);
     
+        // Retrieve their favourite games (if any)
+        $favouriteGames = $profileUser->favoriteGamesUser;
+
+        // Retrieve their favourite notes (if any)
+        $favouriteNotes = $profileUser->favoriteNotesUser;
+    
+    
+        // Retrieve counts of each activity for the specified user
+        $notesCount = $profileUser->notes()->count(); // Assuming User has a 'notes' relationship
+        $gamesCount = $profileUser->games()->count(); // Assuming User has a 'games' relationship
+    
+        // Return the view with all necessary data
         return view('userprofile.index', [
             'profileUser' => $profileUser,
-            'favouriteNotes' => $favouriteNotes
+            'favouriteNotes' => $favouriteNotes,
+            'favouriteGames' => $favouriteGames,
+            'notesCount' => $notesCount,
+            'gamesCount' => $gamesCount,
         ]);
     }
+    
     
     public function showMyProfile()
     {

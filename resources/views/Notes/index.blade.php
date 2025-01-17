@@ -9,14 +9,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <style>
       body {
-        background-color: rgb(233, 233, 233) !important;
+        background-color: rgb(233, 233, 233) !important; /* Fallback background color */
+        background-image: url('{{ asset('images/blue_bg.svg') }}');
+        background-size: cover; /* Ensures the SVG covers the entire screen */
+        background-position: center; /* Centers the SVG image */
+        background-repeat: no-repeat; /* Prevents the SVG from repeating */
         overflow-x: hidden;
       }
+
 
       .rectangle-box {
         width: 100%;
         height: 50%;
-        background-color: #f8f9fa;
+        background-color:rgba(255, 255, 255, 0.5);
         border: 1px solid #dee2e6;
         padding: 20px;
         margin: 20px auto;
@@ -138,7 +143,7 @@
       }
 
       .card.fixed-width-card.fixed-height-card:hover {
-        background-color: rgb(0, 110, 255);
+        background-color: rgba(75, 147, 255, 0.5);
         transition: background-color 0.3s ease;
       }
 
@@ -176,7 +181,7 @@
     @endif
 
     <div class="container mt-5">
-      <!-- Centered Search Bar with Filter UI -->
+      <!-- Centered Search Bar with Filter UI 
       <div class="d-flex justify-content-between w-100 align-items-center mb-3">
         <div class="col-9 d-flex justify-content-start align-items-center">
           <input type="text" class="form-control" placeholder="Search...">
@@ -192,13 +197,15 @@
             <option value="bio">Bio</option>
           </select>
         </div>
-      </div>
+      </div>-->
 
       <!-- Upload Notes Button -->
-      <div class="d-flex justify-content-center mb-3">
+         <div class="rectangle-box">
+      <div class="d-flex justify-content-center">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#notesModal">
-          <i class="fas fa-upload"></i> Upload Notes
+          <i class="fas fa-upload"></i> Upload Note
         </button>
+      </div>
       </div>
 
       <!-- Notes Modal -->
@@ -278,8 +285,6 @@
         </div>
     </div>
 </div>
-
-
           @endforeach
         </div>
       </div>
@@ -310,7 +315,7 @@
               } else if (data.message === 'Note already favorited') {
                 alert('This note is already in your favorites');
               } else {
-                alert('An error occurred while adding the note to favorites');
+                alert('Note removed from favorites');
               }
             })
             .catch(error => {

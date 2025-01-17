@@ -20,7 +20,7 @@
         font-size: 1.5rem; /* Adjust the font size as needed */
       }
       .bg {
-        background: linear-gradient(to top, #2344a1, #3664e3); /* Gradient from blue to white */      
+        background: linear-gradient(to top, #2344a1, #3664e3);  
       }
       .button_login, .button_register {
         display: inline-block;
@@ -76,48 +76,91 @@
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-light bg navbar-custom">
-        <div class="ml-3">
-            <a class="navbar-brand" href="{{ url('/') }}">
-                <img src="{{ asset('images/eduplay_logowhite.svg') }}" class="d-inline-block align-top" alt="Logo">
-                <strong class="ms-2 text-white">EduPlay</strong>
-            </a>
-        </div>
-        
-        <div class="d-flex justify-content-center align-items-center">
-          <a href="{{ url('/') }}" class="hover-highlight text-center d-block w-100 px-5"><strong class="text-white">Home</strong></a>
-          <a href="{{ url('/games') }}" class="hover-highlight text-center d-block w-100 px-5"><strong class="text-white">Games</strong></a>
-          <a href="{{ url('/notes') }}" class="hover-highlight text-center d-block w-100 px-5"><strong class="text-white">Notes</strong></a>
-        </div>
+  <nav class="navbar navbar-light bg navbar-custom">
+    <div class="d-flex align-items-center">
+        <!-- EduPlay Logo and Name -->
+        <a class="navbar-brand d-flex align-items-center me-3" href="{{ url('/') }}">
+            <img src="{{ asset('images/eduplay_logowhite.svg') }}" class="d-inline-block align-top" alt="Logo">
+            <strong class="ms-2 text-white">EduPlay</strong>
+        </a>
 
-        <div class="ml-auto">
-        @if (Route::has('login'))
-    @auth
+        <!-- Navigation Links -->
         <div class="d-flex align-items-center">
-            <a href="{{ url('/userprofile/' . auth()->user()->id) }}">
-                @if(auth()->user()->profile_image)
-                    <img src="{{ asset('storage/' . auth()->user()->profile_image) }}" alt="Profile Image" class="profile-image rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;">
-                @else
-                    <img src="{{ asset('images/placeholder_pfp.svg') }}" alt="Default Profile Image" class="profile-image rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;">
-                @endif
+            <a href="{{ url('/') }}" class="hover-highlight px-3 ms-5">
+                <strong class="text-white">Home</strong>
             </a>
+            <a href="{{ url('/games') }}" class="hover-highlight px-3 ms-5">
+                <strong class="text-white">Games</strong>
+            </a>
+            <a href="{{ url('/notes') }}" class="hover-highlight px-3 ms-5">
+                <strong class="text-white">Notes</strong>
+            </a>
+        </div>
+    </div>
 
-            <!-- Log Out Button with Icon -->
-            <form action="{{ route('logout') }}" method="POST" class="ms-3">
-                @csrf
-                <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-sign-out-alt"></i> <!-- Font Awesome Logout Icon -->
-                </button>
-            </form>
-        </div>
-    @else
-        <a href="{{ route('login') }}" class="button_login text-decoration-none">Log in</a>
-        @if (Route::has('register'))
-            <a href="{{ route('register') }}" class="button_register text-decoration-none">Register</a>
-        @endif
-    @endauth
+    <div class="ml-auto d-flex align-items-center">
+
+        @if (Route::has('login'))
+            @auth
+            
+<!-- Search Form -->
+<form class="d-flex me-3" action="{{ url('/search') }}" method="GET" onsubmit="return validateSearch()">
+    <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" style="width: 300px;" required>
+    <button class="btn btn-outline-light" type="submit">
+        <i class="fas fa-search"></i>
+    </button>
+</form>
+
+<script>
+    function validateSearch() {
+        const searchInput = document.querySelector('[name="query"]');
+        // Trim the input to remove leading/trailing spaces and check if it is empty
+        if (searchInput.value.trim() === "") {
+            // Optionally, you can alert the user
+            alert("Please enter a valid search term.");
+            return false; // Prevent form submission
+        }
+        return true; // Allow form submission
+    }
+</script>
+
+
+                <div class="d-flex align-items-center">
+                    <a href="{{ url('/userprofile/' . auth()->user()->id) }}">
+                        @if(auth()->user()->profile_image)
+                            <img src="{{ asset('storage/' . auth()->user()->profile_image) }}" alt="Profile Image" class="profile-image rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;">
+                        @else
+                            <img src="{{ asset('images/placeholder_pfp.svg') }}" alt="Default Profile Image" class="profile-image rounded-circle img-fluid mt-n2" style="width: 60px; height: 60px; border: 2px solid white;">
+                        @endif
+                    </a>
+                    <!-- Log Out Button with Icon -->
+                    <form action="{{ route('logout') }}" method="POST" class="ms-3">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> <!-- Font Awesome Logout Icon -->
+                        </button>
+                    </form>
+                </div>
+            @else
+<a href="{{ route('login') }}" class="button_login text-decoration-none">Log in</a>
+@if (Route::has('register'))
+    <a href="{{ route('register') }}" class="button_register text-decoration-none ms-3">Register</a>
 @endif
-        </div>
-    </nav>
+            @endauth
+        @endif
+    </div>
+</nav>
+<script>
+    function validateSearch() {
+        const searchInput = document.querySelector('[name="query"]');
+        // Trim the input to remove leading/trailing spaces and check if it is empty
+        if (searchInput.value.trim() === "") {
+            // Optionally, you can alert the user
+            alert("Please enter a valid search term.");
+            return false; // Prevent form submission
+        }
+        return true; // Allow form submission
+    }
+</script>
   </body>
 </html>

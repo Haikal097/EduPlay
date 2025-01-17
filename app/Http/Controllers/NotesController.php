@@ -54,6 +54,30 @@ class NotesController extends Controller
         // Get the count of users who favorited this note
         $favoriteCount = FavouriteNote::where('note_id', $id)->count();
 
-        return view('notes.note', compact('note', 'favoriteCount'));
+        // Check if the authenticated user has favorited this game
+        $isFavorited = Auth::check() && Auth::user()->favouriteNotes->contains($id);
+        return view('notes.note', compact('note', 'favoriteCount','isFavorited'));
     }
+    public function showlistNotes($id)
+{
+    // Fetch games for the current user based on user_id
+    $notes = Note::where('user_id', $id) // Filter games based on the user ID
+        ->withCount('feedback')  // Count feedbacks
+        ->with(['feedback' => function ($query) {
+            $query->selectRaw('note_id, AVG(rating) as avg_rating')
+                  ->groupBy('note_id');
+        }])
+        ->get();
+
+    // Return the view with the games data
+    return view('userprofile.notelist', compact('notes','id '));
+}
+
+public function destroy($id)
+{
+    $note = Note::findOrFail($id);
+    $note->delete();
+
+    return redirect()->back()->with('success', 'Note deleted successfully.');
+}
 }

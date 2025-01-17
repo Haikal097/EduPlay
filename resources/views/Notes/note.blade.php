@@ -170,20 +170,32 @@ textarea.form-control {
 .rate > label:hover ~ input:checked ~ label {
     color: #c59b08;
 }
-.heart-icon-link {
-  position: absolute;
-  top: 10px; /* Adjust the top position */
-  right: 10px; /* Adjust the right position */
-}
 
 .heart-icon {
-  font-size: 1.5rem; /* Adjust heart icon size */
-  color: gray; /* Default color */
+    top: 10px; /* Distance from the top of the container */
+    right: 10px; /* Distance from the right of the container */
+    font-size: 24px; /* Size of the star icon */
+    color: black; /* Default color of the star */
+    background: none; /* No background for the button */
+    border: none; /* Remove default button border */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    padding: 0; /* Remove padding for a snug fit */
+    z-index: 10; /* Ensure the icon is above other elements */
+    transition: color 0.3s ease; /* Smooth color transition */
 }
 
-.heart-icon-link .heart-icon:hover {
-  color: red !important; /* Use !important to override other styles */
-}
+.heart-icon:hover {
+    color: red; /* Change color to black on hover */
+} 
+.fa-heart {
+        color: gray;
+        cursor: pointer;
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .fa-heart.favorited {
+        color: red;
+    }
 
 
 
@@ -210,9 +222,13 @@ textarea.form-control {
   <iframe class="pdf-viewer" src="{{ asset('storage/' . $note->file_path) }}" frameborder="0"></iframe>
 
 <!-- Heart Icon on the top right -->
-<a href="#" class="heart-icon-link">
-  <i class="fas fa-heart {{ $note->is_favourite ? 'text-danger' : 'text-muted' }} heart-icon fs-4" id="favorite-icon-{{ $note->id }}" data-note-id="{{ $note->id }}"></i>
-</a>
+<button class="heart-icon position-absolute"
+        type="button"
+        title="Favorite"
+        data-note-id="{{ $note->id }}"
+        data-favorited="{{ $isFavorited ? 'true' : 'false' }}">
+        <i class="fa fa-heart {{ $isFavorited ? 'favorited' : '' }}"></i>
+</button>
 
 
 </div>
@@ -368,7 +384,7 @@ textarea.form-control {
         <!-- User's Name and Date -->
         <h6 class="mb-0">
           {{ $comment->user->name }}
-          <span class="text-muted">| {{ $comment->created_at->format('F d, Y') }}</span>
+          <span class="text-muted">| {{ $comment->created_at->format('d F Y') }}</span>
         </h6>
         <!-- Star Rating -->
         <div data-coreui-precision="0.25" 
@@ -400,44 +416,39 @@ textarea.form-control {
       </div>
     </div>
     <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll('.heart-icon').forEach(icon => {
-      icon.addEventListener('click', function (event) {
-        event.preventDefault(); // Prevent the default anchor behavior
+document.addEventListener('DOMContentLoaded', function () {
+    const heartIcon = document.querySelector('.heart-icon');
 
+    heartIcon.addEventListener('click', function () {
         const noteId = this.getAttribute('data-note-id');
-        const heartIcon = this; // This is the heart icon itself
+        const isFavorited = this.getAttribute('data-favorited') === 'true';
+        const icon = this.querySelector('i');
 
-        // Make the AJAX request to toggle the favorite status
-        fetch(`/favorite/${noteId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          },
-          body: JSON.stringify({ note_id: noteId })
+        // Send AJAX request
+        fetch(`/notes/${noteId}/favorite`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
         })
         .then(response => response.json())
         .then(data => {
-          if (data.message === 'Note added to favorites') {
-            // Change heart color to red when added to favorites
-            heartIcon.classList.remove('text-muted');
-            heartIcon.classList.add('text-danger');
-            alert('Note added to favorites');
-          } else if (data.message === 'Note removed from favorites') {
-            // Change heart color to gray when removed from favorites
-            heartIcon.classList.remove('text-danger');
-            heartIcon.classList.add('text-muted');
-            alert('Note removed from favorites');
-          }
+            if (data.message) {
+                // Toggle the favorited state
+                if (isFavorited) {
+                    icon.classList.remove('favorited');
+                    this.setAttribute('data-favorited', 'false');
+                } else {
+                    icon.classList.add('favorited');
+                    this.setAttribute('data-favorited', 'true');
+                }
+                alert(data.message);
+            }
         })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('An error occurred while processing your request');
-        });
-      });
+        .catch(error => console.error('Error:', error));
     });
-  });
+});
 </script>
 
 

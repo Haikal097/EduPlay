@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Game Temp</title>
+    <title>{{ $game->title }} • Game</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
@@ -84,6 +84,7 @@
       /* New Styles for Left and Right Containers */
       .container-left {
         width: 30%;
+        height: 360px;
         background-color: #f1f1f1;
         padding: 20px;
         border: 3px solid #ccc;
@@ -93,6 +94,7 @@
 
       .container-right {
         width: 70%;
+        height: 1000px;
         background-color: #f1f1f1;
         padding: 20px;
         border: 3px solid #ccc;
@@ -141,7 +143,76 @@
     color: red; /* Change color to black on hover */
 } 
 
-    </style>
+*{
+    margin: 0;
+    padding: 0;
+}
+.rate {
+    float: left;
+    height: 46px;
+    padding: 0 10px;
+}
+.rate:not(:checked) > input {
+    position:absolute;
+    opacity: 0;
+}
+.rate:not(:checked) > label {
+    float:right;
+    width:1em;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    font-size:30px;
+    color:#ccc;
+}
+.rate:not(:checked) > label:before {
+    content: '★ ';
+}
+.rate > input:checked ~ label {
+    color: #ffc700;    
+}
+.rate:not(:checked) > label:hover,
+.rate:not(:checked) > label:hover ~ label {
+    color: #deb217;  
+}
+.rate > input:checked + label:hover,
+.rate > input:checked + label:hover ~ label,
+.rate > input:checked ~ label:hover,
+.rate > input:checked ~ label:hover ~ label,
+.rate > label:hover ~ input:checked ~ label {
+    color: #c59b08;
+}
+.description-text {
+  font-size: 16px;  /* Adjust the size of the text */
+  color: #555;  /* A medium gray color for the text */
+  margin-top: 10px;  /* Space above the description text */
+  word-wrap: break-word;  /* Ensures long words wrap to the next line */
+}
+
+.user-comment {
+  border-top: 1px solid #ccc; /* Optional: Adds a separator line before the comment */
+  padding-top: 10px;
+}
+
+.comment-image {
+  width: 50px; /* Increase the size (adjust as needed) */
+  height: 50px; /* Match the width for a perfect circle */
+  border-radius: 50%; /* Keeps the circular shape */
+  border: 2px solid #ddd; /* Optional border */
+}
+    .fa-heart {
+        color: gray;
+        cursor: pointer;
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .fa-heart.favorited {
+        color: red;
+    }
+</style>
+
+
+
   </head>
   <body>
     @include('mainpage.nav')
@@ -157,12 +228,17 @@
     @endif
 
     <div class="rectangle-main d-flex flex-column align-items-center position-relative">
-    <!-- Star Icon at Top Right -->
-    <button class="heart-icon position-absolute" type="button" title="Favorite">
-      <i class="fa fa-heart" aria-hidden="true"></i>
-    </button>
+    <!-- Favorite Icon -->
+<button class="heart-icon position-absolute"
+        type="button"
+        title="Favorite"
+        data-game-id="{{ $game->id }}"
+        data-favorited="{{ $isFavorited ? 'true' : 'false' }}">
+        <i class="fa fa-heart {{ $isFavorited ? 'favorited' : '' }}"></i>
+</button>
 
-    <!-- Game Title Above the Rectangle Box -->
+
+    <!-- Game Title -->
     <h3 class="game-title mb-3">{{ $game->title }}</h3>
 
     <!-- Game iframe -->
@@ -174,6 +250,7 @@
         allowfullscreen>
     </iframe>
 </div>
+
 
 
 
@@ -203,9 +280,16 @@
 
   <!-- Placeholder Text -->
   <p class="text-muted">Views: {{ $game->views }}</p>
-  <p class="text-muted">Favourite:</p>
-  <p class="text-muted" style="margin-bottom: 5px;">Score: 3.79</p>
-  <div class="rating" data-coreui-read-only="true" data-coreui-precision="0.25" data-coreui-toggle="rating" data-coreui-value="3.79" ></div>
+  <p class="text-muted">Favourite: {{$favoriteCount}}</p>
+  <p class="text-muted" style="margin-bottom: 5px;">Score: {{ number_format($averageRating, 2) }} ({{ $feedbackCount }} rating{{ $feedbackCount > 1 ? 's' : '' }})</p>
+
+<div class="rating" 
+     data-coreui-read-only="true" 
+     data-coreui-precision="0.25" 
+     data-coreui-toggle="rating" 
+     data-coreui-value="{{ $averageRating }}">
+</div>
+
   
   <!-- Divider Line -->
   <hr class="w-100 my-3">
@@ -223,37 +307,171 @@
     <!-- Divider Line -->
     <hr class="w-100 my-3">
 
-    <!-- Rating with label -->
+    <!-- Feedback Form -->
+    @php
+    $existingFeedback = $game->feedback->where('user_id', auth()->id())->first();
+    $formAction = $existingFeedback 
+    ? route('feedbackgame.update', $existingFeedback->id) 
+    : route('feedback-game.store', ['game' => $game->id]);
+@endphp
+
+<form method="POST" action="{{ $formAction }}">
+    @csrf
+    @if ($existingFeedback)
+        @method('PUT')
+    @endif
+        <!-- Hidden inputs -->
+        <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+    <input type="hidden" name="game_id" value="{{ $game->id }}">
+
+    <!-- Rating with Label -->
     <div class="d-flex justify-content-between align-items-center">
-        <p class="mb-0">Share your feedback!</p>
-        <div data-coreui-precision="0.25" data-coreui-toggle="rating" data-coreui-value="0"></div>
+        <p class="mb-0">{{ $existingFeedback ? 'Edit your feedback!' : 'Share your feedback!' }}</p>
+        <div class="rate ms-auto">
+            @for ($i = 5; $i >= 1; $i--)
+                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" 
+                    {{ $existingFeedback && $existingFeedback->rating == $i ? 'checked' : '' }} />
+                <label for="star{{ $i }}" title="{{ $i }} stars">{{ $i }} stars</label>
+            @endfor
+        </div>
     </div>
 
-    <!-- Textarea below the rating -->
-    <textarea class="form-control mt-3" rows="4" placeholder="Add a comment..." style="resize: none;"></textarea>
+    <!-- Display Validation Errors -->
+    @if ($errors->any())
+        <div class="alert alert-danger mt-2">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-    <!-- Submit Button -->
+    <!-- Textarea for Comment -->
+    <textarea 
+        class="form-control mt-3 @error('comment') is-invalid @enderror" 
+        name="comment" 
+        rows="4" 
+        placeholder="Add a comment..." 
+        style="resize: none;">{{ $existingFeedback ? $existingFeedback->comment : '' }}</textarea>
+
+    <!-- Submit/Edit/Delete Buttons -->
     <div class="text-end mt-3">
-        <button type="submit" class="btn btn-primary">Submit</button>
+        @if ($existingFeedback)
+            <div class="btn-group" role="group">
+                <!-- Delete Button -->
+                <button type="button" class="btn btn-danger" 
+                        onclick="if (confirm('Are you sure you want to delete this feedback?')) { 
+                            document.getElementById('delete-form').submit(); 
+                        }">
+                    Delete
+                </button>
+
+                <!-- Edit Button -->
+                <button type="submit" class="btn btn-primary ms-2">Update</button>
+            </div>
+        @else
+            <button type="submit" class="btn btn-primary">Submit</button>
+        @endif
     </div>
+</form>
+
+@if ($existingFeedback)
+    <!-- Hidden Delete Form -->
+    <form id="delete-form" action="{{ route('feedbackgame.destroy', $existingFeedback->id) }}" method="POST" class="d-none">
+        @csrf
+        @method('DELETE')
+    </form>
+@endif
+
+    
+    <!-- User Comments Section -->
+@forelse($game->feedback as $comment)
+  <div class="user-comment mt-4">
+    <div class="d-flex align-items-center">
+      <!-- User's Profile Pic -->
+      @if($comment->user->profile_image)
+        <img src="{{ asset('storage/' . $comment->user->profile_image) }}" 
+             alt="Profile Image" 
+             class="comment-image" 
+             width="30" 
+             height="30">
+      @else
+        <img src="{{ asset('images/placeholder_pfp.svg') }}" 
+             alt="Default Profile Image" 
+             class="comment-image" 
+             width="30" 
+             height="30">
+      @endif
+
+      <div class="ms-3">
+        <!-- User's Name and Date -->
+        <h6 class="mb-0">
+          {{ $comment->user->name }}
+          <span class="text-muted">| {{ $comment->created_at->format('F d, Y') }}</span>
+        </h6>
+        <!-- Star Rating -->
+        <div data-coreui-precision="0.25" 
+             data-coreui-toggle="rating" 
+             data-coreui-value="{{ $comment->rating }}" 
+             data-coreui-read-only="true"
+             class="mt-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Text -->
+    @if($comment->comment)
+      <p class="mt-2" style="word-wrap: break-word;">{{ $comment->comment }}</p>
+    @endif
+  </div>
+@empty
+<div class="text-center mt-4">
+  <hr> <!-- Divider above the message -->
+  <p class="text-muted mt-2">No feedback yet. Be the first to share your thoughts!</p>
 </div>
+@endforelse
+
+</div>
+
 
 
     </div>
   </body>
   <script>
-    document.querySelector('.heart-icon').addEventListener('click', function () {
-    this.classList.toggle('active');
-    if (this.classList.contains('active')) {
-        this.querySelector('i').classList.add('fas'); // Filled star (Font Awesome)
-        this.querySelector('i').classList.remove('far'); // Outline star (Font Awesome)
-        alert('Added to favorites!');
-    } else {
-        this.querySelector('i').classList.add('far');
-        this.querySelector('i').classList.remove('fas');
-        alert('Removed from favorites!');
-    }
-});
+document.addEventListener('DOMContentLoaded', function () {
+    const heartIcon = document.querySelector('.heart-icon');
 
-  </script>
+    heartIcon.addEventListener('click', function () {
+        const gameId = this.getAttribute('data-game-id');
+        const isFavorited = this.getAttribute('data-favorited') === 'true';
+        const icon = this.querySelector('i');
+
+        // Send AJAX request
+        fetch(`/games/${gameId}/favorite`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                // Toggle the favorited state
+                if (isFavorited) {
+                    icon.classList.remove('favorited');
+                    this.setAttribute('data-favorited', 'false');
+                } else {
+                    icon.classList.add('favorited');
+                    this.setAttribute('data-favorited', 'true');
+                }
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+
 </html>

@@ -110,7 +110,7 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'afiqh970@gmail.com'),
-        'name' => env('MAIL_FROM_NAME', 'Laravel'),
+        'name' => env('MAIL_FROM_NAME', 'EduPlay'),
     ],
 
 ];

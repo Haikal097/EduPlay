@@ -12,21 +12,39 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-      body {
-        background-color: rgb(233, 233, 233) !important; /* Change this to your desired background color */
-        overflow-x: hidden;
-      }
+    body {
+      background-color: rgb(233, 233, 233) !important; /* Fallback background color */
+      background-image: url('{{ asset('images/blue_bg.svg') }}');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow-x: hidden;
+    }
 
       .rectangle-box {
         width: 80%;
         height: 50%;
-        background-color: #f8f9fa; /* Light gray background */
+        background-color:rgba(248, 249, 250, 0.75); /* Light gray background */
         border: 1px solid #dee2e6; /* Light gray border */
         padding: 20px;
         margin: 20px auto; /* Center the box horizontally */
         border-radius: 15px; /* Rounded corners */
         position: relative;
       }
+
+      .rounded-top {
+    border-top-left-radius: 15px !important; /* Rounds the top-left corner */
+    border-top-right-radius: 15px !important; /* Rounds the top-right corner */
+    border-bottom-left-radius: 0 !important; /* Keeps the bottom-left corner square */
+    border-bottom-right-radius: 0 !important; /* Keeps the bottom-right corner square */
+}
+
+      .rounded-bottom {
+    border-top-left-radius: 0 !important; /* Ensures the top-left corner stays square */
+    border-top-right-radius: 0 !important; /* Ensures the top-right corner stays square */
+    border-bottom-left-radius: 15px !important; /* Rounds the bottom-left corner */
+    border-bottom-right-radius: 15px !important; /* Rounds the bottom-right corner */
+}
 
       .profile-background {
         width: 97%; /* Adjust the size as needed */
@@ -90,10 +108,10 @@
       .text-outline {
         color: black; /* Inside color */
         text-shadow: 
-          -1px -1px 0 rgb(184, 184, 184),
-          1px -1px 0 rgb(184, 184, 184),
-          -1px 1px 0 rgb(184, 184, 184),
-          1px 1px 0 rgb(184, 184, 184);
+          -1px -1px 0 rgb(255, 255, 255),
+          1px -1px 0 rgb(255, 255, 255),
+          -1px 1px 0 rgb(255, 255, 255),
+          1px 1px 0 rgb(255, 255, 255);
       }
 
       .vertical-divider {
@@ -203,6 +221,45 @@
         transform: translateX(0);
         transition: transform 0.3s ease;
       }
+      .activity-list {
+    display: flex;
+    justify-content: space-between; /* Spread items evenly */
+    align-items: center;
+    width: 100%;
+    padding: 10px 0;
+    position: relative;
+}
+
+.activity-item {
+    flex: 1; /* Allow items to share equal space */
+    text-align: center;
+}
+
+.activity-item h3 {
+    margin: 0;
+    font-size: 1.25rem; /* Adjust heading size */
+    color: #333;
+}
+
+.activity-count {
+    font-size: 1.5rem; /* Slightly larger for emphasis */
+    font-weight: bold;
+    color: #007bff; /* Bootstrap primary blue */
+    margin: 5px 0 0;
+}
+
+/* Vertical Divider */
+.vertical-divider2 {
+    width: 1px;
+    height: 60px;
+    background-color: #dee2e6; /* Light gray color */
+    margin: 0 10px; /* Add spacing around the divider */
+}
+
+a {
+  text-decoration: none !important;
+}
+
     </style>
   </head>
   <body>
@@ -225,7 +282,7 @@
     @endif
 
     <div class="container mt-5">
-    <div class="rectangle-box d-flex align-items-center position-relative">
+    <div class="rectangle-box d-flex align-items-center position-relative rounded-top mb-2">
     <!-- Info Icon -->
     <a href="#" class="info-icon position-absolute" style="top: -2px; right: 4px;" data-bs-toggle="modal" data-bs-target="#infoModal">
         <i class="bi bi-info-circle-fill" style="font-size: 1.5rem; color: #007bff;"></i>
@@ -266,16 +323,53 @@
     </div>
 </div>
         
+<div class="rectangle-box d-flex align-items-center flex-column rounded-bottom mt-2 p-3">
+    <div class="activity-list d-flex justify-content-around w-100 align-items-center">
+        <!-- Notes -->
+        <div class="activity-item text-center">
+            <h3 class="mb-1">Notes</h3>
+            
+    <a href="{{ route('notelist.index', ['id' => request()->route('id')]) }}" style="text-decoration: none;">
+    <p class="activity-count display-6 fw-bold">{{ $notesCount ?? 0 }}</p>
+  </a>
+        </div>
+        <!-- Divider -->
+        <div class="vertical-divider2 bg-secondary" style="width: 1px; height: 50px;"></div>
+        <!-- Games -->
+        <div class="activity-item text-center">
+    <h3 class="mb-1">Games</h3>
+    <a href="{{ route('gamelist.index', ['id' => request()->route('id')]) }}" style="text-decoration: none;">
+        <p class="activity-count display-6 fw-bold">{{ $gamesCount ?? 0 }}</p>
+    </a>
+</div>
+    </div>
+</div>
+
+
+
+
+
+
         <!-- Favorite games list -->
         <div class="rectangle-box d-flex align-items-center flex-column">
             <h2 class="title-overlap text-outline"><strong>&#9733; Favourite Games </strong></h2>
-            @if($favouriteNotes->isEmpty())
+            @if($favouriteGames->isEmpty())
                 <p>{{ $profileUser->name }} has no favorite games yet.</p>
             @else
                 <div class="horizontal-list-wrapper">
                     <div class="horizontal-list-container">
                         <div class="horizontal-list d-flex align-items-center">
-                          
+                        @foreach($favouriteGames as $favorite)
+                        <a href="{{ route('game.show', ['id' => $favorite->game->id]) }}" class="note-card-link">
+                              <div class="note-card">
+                                  <img src="{{ Storage::url($favorite->game->thumbnail_path) }}" class="thumbnail-image" alt="Thumbnail">
+                                  <div class="note-info">
+                                      <strong>{{ $favorite->game->title }}</strong>
+                                      <p>{{ $favorite->game->user->name }}</p>
+                                  </div>
+                              </div>
+                          </a>
+                      @endforeach
                         </div>
                     </div>
                 </div>
@@ -290,7 +384,8 @@
                 <div class="horizontal-list-wrapper">
                     <div class="horizontal-list-container">
                         <div class="horizontal-list d-flex align-items-center">
-                            @foreach($favouriteNotes as $favorite)
+                        @foreach($favouriteNotes as $favorite)
+                            <a href="{{ route('notes.show', ['id' => $favorite->note->id]) }}" class="note-card-link">
                                 <div class="note-card">
                                     <img src="{{ Storage::url($favorite->note->thumbnail_path) }}" class="thumbnail-image" alt="Thumbnail">
                                     <div class="note-info">
@@ -298,7 +393,8 @@
                                         <p>{{ $favorite->note->user->name }}</p>
                                     </div>
                                 </div>
-                            @endforeach
+                            </a>
+                        @endforeach
                         </div>
                     </div>
                 </div>
